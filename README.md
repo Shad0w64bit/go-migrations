@@ -1,12 +1,14 @@
 Каждый файл миграции должен соответсвует шаблону  
-<id>_<name>.up.sql  
+```
+<id>_<name>.up.sql
 <id>_<name>.down.sql
 
-Пример    
+Пример:
 123_create_user_table.up.sql  
 123_create_user_table.down.sql  
 ---  
 1673602735_init.up.sql  
+```
 
 id - любое положительное число, может быть как порядковым так и unixtime, но уникальным (
 Является primary-key для таблицы)  
