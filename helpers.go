@@ -13,9 +13,11 @@ import (
 )
 
 
-func upMigrate(db *sql.DB, path string, m migrationRecord) error {
-	ctx := context.Background()
-	tx, err := db.BeginTx(ctx, nil)
+func upMigrate(cfg *Config, m migrationRecord) error {
+	ctx, cancel:= context.WithTimeout(context.Background(), cfg.Timeout)
+	defer cancel()
+
+	tx, err := cfg.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -23,25 +25,25 @@ func upMigrate(db *sql.DB, path string, m migrationRecord) error {
 	_, err = tx.ExecContext(ctx, "INSERT INTO schema_migrations (id, name) VALUES ($1, $2)",
 		m.Time.Unix(), m.Name)
 	if err != nil {
-		if errRol := tx.Rollback(); errRol != nil {
-			return errRol
-		}
 		return err
 	}
 
-	file, err := ioutil.ReadFile(path + "\\" + fmt.Sprintf("%d_%s.up.sql", m.Time.Unix(), m.Name) )
+	/*
+	// Genertate timeout request
+	n := rand.Intn(4)+2
+	_, err = tx.ExecContext(ctx, "SELECT pg_sleep($1)", n)
 	if err != nil {
-		if errRol := tx.Rollback(); errRol != nil {
-			return errRol
-		}
+		return err
+	}
+	*/
+
+	file, err := ioutil.ReadFile(cfg.Path + "\\" + fmt.Sprintf("%d_%s.up.sql", m.Time.Unix(), m.Name) )
+	if err != nil {
 		return err
 	}
 
 	_, err = tx.ExecContext( ctx, string(file) )
 	if err != nil {
-		if errRol := tx.Rollback(); errRol != nil {
-			return errRol
-		}
 		return err
 	}
 
@@ -52,34 +54,37 @@ func upMigrate(db *sql.DB, path string, m migrationRecord) error {
 	return nil
 }
 
-func downMigrate(db *sql.DB, path string, m migrationRecord) error {
-	ctx := context.Background()
-	tx, err := db.BeginTx(ctx, nil)
+
+func downMigrate(cfg *Config, m migrationRecord) error {
+	ctx, cancel:= context.WithTimeout(context.Background(), cfg.Timeout)
+	defer cancel()
+
+	tx, err := cfg.Db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
 	_, err = tx.ExecContext(ctx, "DELETE FROM schema_migrations WHERE id=$1", m.Time.Unix())
 	if err != nil {
-		if errRol := tx.Rollback(); errRol != nil {
-			return errRol
-		}
 		return err
 	}
 
-	file, err := ioutil.ReadFile(path + "\\" + fmt.Sprintf("%d_%s.down.sql", m.Time.Unix(), m.Name) )
+	/*
+	// Genertate timeout request
+	n := rand.Intn(4)+2
+	_, err = tx.ExecContext(ctx, "SELECT pg_sleep($1)", n)
 	if err != nil {
-		if errRol := tx.Rollback(); errRol != nil {
-			return errRol
-		}
+		return err
+	}
+	*/
+
+	file, err := ioutil.ReadFile(cfg.Path + "\\" + fmt.Sprintf("%d_%s.down.sql", m.Time.Unix(), m.Name) )
+	if err != nil {
 		return err
 	}
 
 	_, err = tx.ExecContext( ctx, string(file) )
 	if err != nil {
-		if errRol := tx.Rollback(); errRol != nil {
-			return errRol
-		}
 		return err
 	}
 
