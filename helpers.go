@@ -138,6 +138,7 @@ func getDatabaseMigrations(db *sql.DB) (m []migrationRecord, err error) {
 		log.Printf("Migration select error: %s", err)
 		return []migrationRecord{}, nil
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var mr migrationRecord
@@ -157,6 +158,7 @@ func createMigrationTableIfNeed(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
