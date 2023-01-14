@@ -32,6 +32,7 @@ migrations.Config struct {
 	Path string
 	Db *sql.DB
 	Verbose int
+	Timeout time.Durtaion
 }
 ```
 
@@ -42,6 +43,7 @@ Verbose - уровень вывода логов в консоль
 	0 - не выводить логи  
 	1 - только важные логи  
 	2 - все логи (подробно, debug-режим)  
+Timeout - время на выполнение одной миграции (по умолчанию: 2 секунды)
 
 ## Использование
 ```
@@ -59,9 +61,16 @@ func main() {
 	db, _ := Open()
 	
 	cfg := migrations.GetConfig()
+	
 	cfg.Db = db
 	cfg.Path = "./migrations"
-	cfg.Verbose = 1 	
+	
+	// Подробный вывод	
+	// cfg.Verbose = 2
+	
+	// Устанавливаем таймаут в 5 секунд на одну миграцию
+	// cfg.Timeout = 5*time.Second
+	
 	migrations.SetConfig( cfg )
 	
 	# Migrate Up

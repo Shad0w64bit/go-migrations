@@ -30,7 +30,7 @@ var config = Config{
 	Step:    -1,
 	Path:    "./migrations/",
 	Verbose: 1,
-	Timeout: 5 * time.Second,
+	Timeout: 2 * time.Second,
 }
 
 type migrationRecord struct {
