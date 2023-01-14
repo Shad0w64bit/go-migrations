@@ -44,14 +44,6 @@ func GetConfig() Config {
 
 func SetConfig(cfg Config) {
 	config = cfg
-/*	log.Println(config)
-	log.Println(cfg)
-	_, err := patch.Struct(&config, cfg)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(config)
-	// config = c*/
 }
 
 // Migrate all (Step==-1) or step()
@@ -81,12 +73,12 @@ func Up() error {
 	}
 
 
-	// 1.1 Создать таблицу для миграций если нужно
+	// 2 Создать таблицу для миграций если нужно
 	if err := createMigrationTableIfNeed(config.Db); err != nil {
 		return err
 	}
 
-	// 2. Получаем уже примененые миграции из БД
+	// 3. Получаем уже примененые миграции из БД
 	dbMigrationList, err := getDatabaseMigrations(config.Db)
 	if err != nil {
 		return err
@@ -106,18 +98,18 @@ func Up() error {
 		log.Print("=== End ===")
 	}
 
-	// Сортируем по времени от старого к новому
+	// 4. Сортируем по времени от старого к новому
 	sort.Slice(dbMigrationList, func(i, j int) bool {
 		return dbMigrationList[i].Time.Before(dbMigrationList[j].Time)
 	})
 
-	// 3. Определяем разницу
+	// 5. Определяем разницу
 	selMigrations, err := diffMigrations(pathMigrationList, dbMigrationList)
 	if err != nil {
 		return err
 	}
 
-	// 4. Отрезаем N-миграций если указан Step
+	// 6. Отрезаем N-миграций если указан Step
 	if config.Step > 0 && config.Step < len(selMigrations) {
 		selMigrations = selMigrations[:config.Step]
 	}
@@ -136,7 +128,7 @@ func Up() error {
 		log.Print("=== End ===")
 	}
 
-	// 5. Пытаемся накатить миграции которых ещё нет
+	// 7. Пытаемся накатить миграции которых ещё нет
 	for _, migrate := range selMigrations {
 		log.Printf("Run migration: %d_%s", migrate.Time.Unix(), migrate.Name)
 		if err := upMigrate(&config, migrate); err != nil {
@@ -144,7 +136,7 @@ func Up() error {
 		}
 	}
 
-	// 6. Если миграций не осталось и все успешно выходим без ошибок
+	// 8. Если миграций не осталось и все успешно выходим без ошибок
 	if config.Verbose > 0 {
 		log.Print("All migrations successfully applied")
 	}
@@ -157,7 +149,7 @@ func Down() error {
 		return errors.New("Migration: Database unreachable")
 	}
 
-	// 1.1 Создать таблицу для миграций если нужно
+	// 1. Создать таблицу для миграций если нужно
 	if err := createMigrationTableIfNeed(config.Db); err != nil {
 		return err
 	}
@@ -182,16 +174,10 @@ func Down() error {
 		log.Print("=== End ===")
 	}
 
-	// Сортируем по времени от нового к старому
+	// 3. Сортируем по времени от нового к старому
 	sort.Slice(selMigrations, func(i, j int) bool {
 		return selMigrations[i].Time.After(selMigrations[j].Time)
 	})
-
-/*	// 3. Определяем разницу
-	selMigrations, err := diffMigrations(pathMigrationList, dbMigrationList)
-	if err != nil {
-		return err
-	}*/
 
 	// 4. Отрезаем N-миграций если указан Step
 	if config.Step > 0 && config.Step < len(selMigrations) {

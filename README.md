@@ -50,20 +50,19 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 	
-	# migrations "github.com/Shad0w64bit/go_migrations"
-	_ "github.com/Shad0w64bit/go_migrations"		
+	// migrations "github.com/Shad0w64bit/go-migrations"
+	_ "github.com/Shad0w64bit/go-migrations"		
 
 )
 
 func main() {
 	db, _ := Open()
 	
-	migrations.SetConfig( migrations.Config{
-		Step: -1,
-		Db: db,
-		Path: "./migrations",
-		Verbose: 1,
-	})
+	cfg := migrations.GetConfig()
+	cfg.Db = db
+	cfg.Path = "./migrations"
+	cfg.Verbose = 1 	
+	migrations.SetConfig( cfg )
 	
 	# Migrate Up
 	if err := migrations.Up(); err != nil {	
