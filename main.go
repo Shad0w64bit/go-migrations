@@ -48,7 +48,9 @@ func SetConfig(cfg Config) {
 
 // Migrate all (Step==-1) or step()
 func Up() error {
-	log.Print("=== Migration Up ===")
+	if config.Verbose > 0 {
+		log.Print("=== Migration Up ===")
+	}
 	if config.Db == nil || config.Db.Ping() != nil {
 		return errors.New("Migration: Database unreachable")
 	}
@@ -144,7 +146,9 @@ func Up() error {
 }
 
 func Down() error {
-	log.Print("=== Migration Down ===")
+	if config.Verbose > 0 {
+		log.Print("=== Migration Down ===")
+	}
 	if config.Db == nil || config.Db.Ping() != nil {
 		return errors.New("Migration: Database unreachable")
 	}
