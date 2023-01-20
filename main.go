@@ -26,28 +26,29 @@ type Config struct {
 	Timeout time.Duration
 }
 
-var config = Config{
-	Step:    -1,
-	Path:    "./migrations/",
-	Verbose: 1,
-	Timeout: 2 * time.Second,
-}
-
 type migrationRecord struct {
 	Time time.Time
 	Name string
 }
 
 func GetConfig() Config {
+	config := Config{
+    	Step:    -1,
+    	Path:    "./migrations/",
+    	Verbose: 1,
+    	Timeout: 2 * time.Second,
+    }
+
 	return config
 }
-
+/*
 func SetConfig(cfg Config) {
 	config = cfg
 }
+ */
 
 // Migrate all (Step==-1) or step()
-func Up() error {
+func Up(config *Config) error {
 	if config.Verbose > 0 {
 		log.Print("=== Migration Up ===")
 	}
@@ -133,7 +134,7 @@ func Up() error {
 	// 7. Пытаемся накатить миграции которых ещё нет
 	for _, migrate := range selMigrations {
 		log.Printf("Run migration: %d_%s", migrate.Time.Unix(), migrate.Name)
-		if err := upMigrate(&config, migrate); err != nil {
+		if err := upMigrate(config, migrate); err != nil {
 			return err
 		}
 	}
@@ -145,7 +146,7 @@ func Up() error {
 	return nil
 }
 
-func Down() error {
+func Down(config *Config) error {
 	if config.Verbose > 0 {
 		log.Print("=== Migration Down ===")
 	}
@@ -205,7 +206,7 @@ func Down() error {
 	// 5. Пытаемся накатить миграции которых ещё нет
 	for _, migrate := range selMigrations {
 		log.Printf("Revert migration: %d_%s", migrate.Time.Unix(), migrate.Name)
-		if err := downMigrate(&config, migrate); err != nil {
+		if err := downMigrate(config, migrate); err != nil {
 			return err
 		}
 	}

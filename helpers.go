@@ -3,10 +3,12 @@ package migrations
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
+"fmt"
 	"io/ioutil"
 	"log"
-	"regexp"
+	"os"
+"regexp"
 	"sort"
 	"strconv"
 	"time"
@@ -38,13 +40,15 @@ func upMigrate(cfg *Config, m migrationRecord) error {
 	*/
 
 	file, err := ioutil.ReadFile(cfg.Path + "\\" + fmt.Sprintf("%d_%s.up.sql", m.Time.Unix(), m.Name) )
-	if err != nil {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 
-	_, err = tx.ExecContext( ctx, string(file) )
-	if err != nil {
-		return err
+	if err == nil {
+		_, err = tx.ExecContext( ctx, string(file) )
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -79,13 +83,15 @@ func downMigrate(cfg *Config, m migrationRecord) error {
 	*/
 
 	file, err := ioutil.ReadFile(cfg.Path + "\\" + fmt.Sprintf("%d_%s.down.sql", m.Time.Unix(), m.Name) )
-	if err != nil {
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 
-	_, err = tx.ExecContext( ctx, string(file) )
-	if err != nil {
-		return err
+	if err == nil {
+		_, err = tx.ExecContext( ctx, string(file) )
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
