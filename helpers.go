@@ -3,11 +3,11 @@ package migrations
 import (
 	"context"
 	"database/sql"
-	"errors"
+//	"errors"
 "fmt"
 	"io/ioutil"
 	"log"
-	"os"
+//	"os"
 "regexp"
 	"sort"
 	"strconv"
@@ -39,8 +39,9 @@ func upMigrate(cfg *Config, m migrationRecord) error {
 	}
 	*/
 
-	file, err := ioutil.ReadFile(cfg.Path + "\\" + fmt.Sprintf("%d_%s.up.sql", m.Time.Unix(), m.Name) )
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
+	file, err := ioutil.ReadFile(cfg.Path + "/" + fmt.Sprintf("%d_%s.up.sql", m.Time.Unix(), m.Name) )
+	//if err != nil && !errors.Is(err, os.ErrNotExist) {
+	if err != nil {
 		return err
 	}
 
@@ -82,8 +83,9 @@ func downMigrate(cfg *Config, m migrationRecord) error {
 	}
 	*/
 
-	file, err := ioutil.ReadFile(cfg.Path + "\\" + fmt.Sprintf("%d_%s.down.sql", m.Time.Unix(), m.Name) )
-	if err != nil && !errors.Is(err, os.ErrNotExist) {
+	file, err := ioutil.ReadFile(cfg.Path + "/" + fmt.Sprintf("%d_%s.down.sql", m.Time.Unix(), m.Name) )
+	//if err != nil && !errors.Is(err, os.ErrNotExist) {
+	if err != nil {	
 		return err
 	}
 
